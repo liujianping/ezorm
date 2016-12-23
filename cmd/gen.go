@@ -21,7 +21,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/ezbuy/ezorm/parser"
 	"github.com/spf13/cobra"
@@ -69,19 +69,22 @@ var genCmd = &cobra.Command{
 			databases[xwMetaObj.Db] = xwMetaObj
 			for _, genType := range xwMetaObj.GetGenTypes() {
 				fileAbsPath := output + "/gen_" + xwMetaObj.Name + "_" + genType + ".go"
+				fmt.Println("genType =>", fileAbsPath)
 				executeTpl(fileAbsPath, genType, xwMetaObj)
 			}
 		}
 
-		for db, obj := range databases {
-			if tpl, ok := obj.GetConfigTemplate(); ok {
-				fileAbsPath := output + "/gen_" + db + "_config.go"
-				executeTpl(fileAbsPath, tpl, obj)
+		for _, obj := range databases {
+			for _, t := range obj.GetConfigTemplates() {
+				fileAbsPath := output + "/gen_" + t + ".go"
+				fmt.Println("config =>", fileAbsPath)
+				executeTpl(fileAbsPath, t, obj)
 			}
 		}
 
 		oscmd := exec.Command("gofmt", "-w", output)
 		oscmd.Run()
+
 	},
 }
 
@@ -91,7 +94,6 @@ func executeTpl(fileAbsPath, tplName string, xwMetaObj *parser.Obj) {
 		panic(err)
 	}
 	xwMetaObj.TplWriter = file
-
 	err = parser.Tpl.ExecuteTemplate(file, tplName, xwMetaObj)
 	file.Close()
 	if err != nil {

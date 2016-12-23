@@ -24,6 +24,13 @@ func (p *Blog) GetNameSpace() string {
 func (p *Blog) GetClassName() string {
 	return "Blog"
 }
+func (p *Blog) GetStoreType() string {
+	return "hash"
+}
+
+func (p *Blog) GetPrimaryKey() string {
+	return "BlogId"
+}
 
 func (p *Blog) GetIndexes() []string {
 	idx := []string{
